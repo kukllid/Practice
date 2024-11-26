@@ -92,8 +92,7 @@ int conv(char **words)
     pid_t pid = fork();
     signal(SIGINT, SIG_IGN);
     if (pid == 0) {
-        
-        signal(SIGINT, SIG_DFL);
+        if (!background_mode) signal(SIGINT, SIG_DFL);
         int flag_first = 0; // перенаправление ввода вывода для первого
         int fd[2];
         int cur_pos = 0; // current position
@@ -200,10 +199,6 @@ void big_execute(char **words, int n)
     char cond = 0;
     int prev_sub_com_status = -1;
     if (check_for_and(words)) {
-        pid_t pid_waiter = fork();
-        if (pid_waiter < 0) {
-            perror("\nERROR: could not fork ");
-        } else if (pid_waiter == 0) {
             pid_t pid = fork();
             if (pid < 0) {
                 perror("\nERROR: could not fork ");
@@ -248,12 +243,8 @@ void big_execute(char **words, int n)
             }
             free(sub_com);
         }
-            exit(prev_sub_com_status);
-            }
-            int status;
-            waitpid(pid, &status, 0);
-            _exit(0);
-        }
+        _exit(0);
+      }
     } else {
         while (words[cur_pos] != NULL) {
             int l = 5;
@@ -308,7 +299,7 @@ void create_spis(FILE *fp)
     
     // цикл для считывания всех символов
     while (fscanf(fp, "%c", &c) == 1) {
-        waitpid(-1, NULL, WNOHANG);
+        waitpid(-1, NULL, WNOHANG); //если есть работающий сын, то не блокируемся, если зомби, то очищаем его
         if (c == '\n' && words_cur_num > 0) {
             big_execute(words, words_cur_num);
             words_cur_num = 0;
