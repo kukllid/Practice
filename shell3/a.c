@@ -158,7 +158,7 @@ int conv(char **words)
               } else {
                 printf("\nProcess %d aborted by signal %d\n>", getpid(), WTERMSIG(status));
               }
-              while (waitpid(-1, &status, 0) != -1);
+              while (waitpid(-1, &status, 0) != -1){};
               _exit(1);
             }
         }
@@ -173,7 +173,7 @@ int conv(char **words)
     }
     int status = 0;
  
-    while (waitpid(pid, &status, 0) != -1) {
+    while (waitpid(pid, &status,0) != -1) {
     };
     signal(SIGINT, SIG_DFL);
     return !WIFEXITED(status) || WEXITSTATUS(status);
@@ -200,6 +200,10 @@ void big_execute(char **words, int n)
     char cond = 0;
     int prev_sub_com_status = -1;
     if (check_for_and(words)) {
+        pid_t pid_waiter = fork();
+        if (pid_waiter < 0) {
+            perror("\nERROR: could not fork ");
+        } else if (pid_waiter == 0) {
             pid_t pid = fork();
             if (pid < 0) {
                 perror("\nERROR: could not fork ");
@@ -243,8 +247,12 @@ void big_execute(char **words, int n)
                 break;
             }
             free(sub_com);
-          }
-          exit(0);
+        }
+            exit(prev_sub_com_status);
+            }
+            int status;
+            waitpid(pid, &status, 0);
+            _exit(0);
         }
     } else {
         while (words[cur_pos] != NULL) {
@@ -297,10 +305,10 @@ void create_spis(FILE *fp)
     unsigned long words_cur_num = 0; // cur num of stored words
     char **words = malloc(sizeof(char *) * words_len);
     printf("> ");
- 
+    
     // цикл для считывания всех символов
     while (fscanf(fp, "%c", &c) == 1) {
-        while (waitpid(-1, NULL, WNOHANG) != -1){};
+        waitpid(-1, NULL, WNOHANG);
         if (c == '\n' && words_cur_num > 0) {
             big_execute(words, words_cur_num);
             words_cur_num = 0;
@@ -415,10 +423,10 @@ int main(int argc, char **argv)
             fprintf(stderr, "No such file");
         }
     }
+ 
     create_spis(fp);
     if (fp != stdin) {
         fclose(fp);
     }
-    while(wait(NULL) > 0);
     return 0;
 }
