@@ -1,0 +1,228 @@
+#include <iostream>
+#include <cstdio>
+
+class DateTime;
+class DataTimeSpan{
+    private:
+        double res;
+        
+    public:
+    DataTimeSpan(int days = 0, int hours = 0, int minutes = 0, int seconds = 0){
+        res = days + hours * 1.0/24 + minutes * 1.0 /24 / 60 + seconds * 1.0 / 24 / 60 / 60;
+    };
+    DataTimeSpan(double x){
+        res = x;
+    }
+    double get(){
+        return res;
+    }
+    friend DataTimeSpan operator- (DataTimeSpan & a, DataTimeSpan & b);
+    friend DataTimeSpan operator+ (DataTimeSpan & a, DataTimeSpan & b);
+    friend DataTimeSpan operator- (DateTime & a, DateTime & b);
+    friend DateTime operator+ (DateTime & a, DataTimeSpan & b);
+    friend DateTime operator- (DateTime & a, DataTimeSpan & b);
+    friend DataTimeSpan operator- (DataTimeSpan & a);
+};
+
+class DateTime { 
+    private:
+          double res = 0;
+    public:
+        DateTime (double x): res{x} {}
+        DateTime(int day, int month,int year,int hour,int min,int second) {
+            int a, b,c,d;
+            if (year >= 2000){
+                res = 1.0/24 * hour + 1.0/24/60 * min + 1.0/24/60/60 * second + day - 1;
+                a = 1; b = month; c = 2000; d = year;
+            }
+            else{
+                res = 1.0 - (1.0/24 * hour + 1.0/24/60 * min + 1.0/24/60/60 * second ) - day;
+                a = month; b = 13; c = year + 1; d = 2000;
+            }
+            
+            for (; a < b; a++){
+                switch (a) {
+                case 1: // January
+                case 3: // March
+                case 5: // May
+                case 7: // July
+                case 8: // August
+                case 10: // October
+                case 12: // December
+                    res += 31;
+                    break;
+                case 4: // April
+                case 6: // June
+                case 9: // September
+                case 11: // November
+                    res += 30;
+                    break;
+                case 2: // February
+                    if ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)) {
+                        res += 29; // Leap year
+                    } else {
+                        res += 28;
+                    }
+                    break;
+                }
+            }
+            
+            for (; c < d; c ++){
+                if ((c % 4 == 0 && c % 100 != 0) || (c % 400 == 0)) {
+                        res += 366; // Leap year
+                    } else {
+                        res += 365;
+                    }
+            }
+            if (year < 2000){
+                res = 0 - res;
+            }
+
+        }
+        void get(){
+            long long t = res * 60 * 60 * 24 ;
+            int num_of_days = 1;
+            int num_of_month = 1;
+            int num_of_years = 2000;
+            if (t > 0){
+                while(t >= 60 * 60 * 24){
+                    t -= 60 * 60 * 24;
+                    if (num_of_days >= 28){
+                        if ((num_of_days == 31) && (num_of_month == 1 || num_of_month == 3 || num_of_month == 5 || num_of_month == 7 || num_of_month == 8 || num_of_month == 10 || num_of_month == 12)){
+                            if (num_of_month == 12){
+                                num_of_days = 0;
+                                num_of_month = 1;
+                                num_of_years++;
+                            }
+                            else{
+                                num_of_days = 0;
+                                num_of_month ++;
+                            }
+                        }
+                        else if ((num_of_days ==30) && (num_of_month == 4 || num_of_month == 6 || num_of_month == 9 || num_of_month == 11)){
+                            num_of_days = 0;
+                            num_of_month ++;
+                        }
+                        else if ((num_of_month == 2)){
+                            if ((num_of_years % 4 == 0 && num_of_years % 100 != 0) || (num_of_years % 400 == 0)) {
+                                if (num_of_days == 29){
+                                num_of_days = 0;
+                                num_of_month ++;
+                                } 
+                            } else {
+                                num_of_days = 0;
+                                num_of_month ++;
+                            }
+                        }
+                    }
+                    num_of_days++;
+                }
+            }
+            else{
+                
+                while(t < 0){
+                    
+                    t += 60 * 60 * 24;
+                    if (num_of_days == 1){
+                        if (num_of_month == 1 || num_of_month == 5 || num_of_month == 7 ||  num_of_month == 10 || num_of_month == 12){
+                            
+                            if (num_of_month == 1){
+                                num_of_days = 32;
+                                num_of_month = 12;
+                                num_of_years--;
+                            }
+                            else{
+                                num_of_days = 31;
+                                num_of_month --;
+                            }
+                        }
+                        else if (num_of_month == 2 ||num_of_month == 4 || num_of_month == 6 || num_of_month == 8|| num_of_month == 9 || num_of_month == 11){
+                            num_of_days = 32;
+                            num_of_month --;
+                        }
+                        else if ((num_of_month == 3)){
+                            if ((num_of_years % 4 == 0 && num_of_years % 100 != 0) || (num_of_years % 400 == 0)) {
+                                num_of_days = 30;
+                                num_of_month --;
+                                
+                            } else {
+                                num_of_days = 29;
+                                num_of_month --;
+                            }
+                        }
+                    }
+                    num_of_days--;
+                }
+                
+            }
+            std :: printf("%02d.%02d.%04d ",  num_of_days, num_of_month, num_of_years);
+            
+            
+            int hour = t/60/60;
+            int min = (t - hour * 60 * 60) / 60;
+            int second = (t - hour * 60 * 60 - min * 60) ;
+            
+            std :: printf("%02d:%02d:%02d\n", hour, min, second);
+        }
+        void gget(){
+            std :: cout << res << std :: endl;
+        }
+        friend DataTimeSpan operator- (DateTime & a, DateTime & b);
+        friend DateTime operator+ (DateTime & a, DataTimeSpan & b);
+        friend DateTime operator- (DateTime & a, DataTimeSpan & b);
+    };
+
+DataTimeSpan operator- (DataTimeSpan & a, DataTimeSpan & b){
+    DataTimeSpan s(a.res - b.res);
+    return s;
+}
+
+DataTimeSpan operator+ (DataTimeSpan & a, DataTimeSpan & b){
+    DataTimeSpan s(a.res + b.res);
+    return s;
+}
+
+DataTimeSpan operator- (DateTime & a, DateTime & b){
+    DataTimeSpan s(a.res - b.res);
+    return s;
+}
+
+DateTime operator+ (DateTime & a, DataTimeSpan & b){
+    DateTime s(a.res + b.res);
+    return s;
+}
+
+DateTime operator- (DateTime & a, DataTimeSpan & b){
+    DateTime s(a.res - b.res);
+    return s;
+}
+
+DataTimeSpan operator- (DataTimeSpan & a){
+    DataTimeSpan s(- a.res);
+    return s;
+}
+
+int main() {
+    //double x;
+    //std::cin>>x;
+    //DateTime(x).get();
+    DateTime d1(4, 1, 2000, 12, 0, 0);
+    DateTime d(1, 1, 2000, 10, 0, 0);
+    DataTimeSpan s, s1;
+    s = d1 - d; //
+    double print1 = s.get();
+    
+    std :: cout << print1 << std :: endl;
+    s1 = d - d1;
+    d = d1 + s;
+    //s = -s;
+    s = s - s1;
+    DateTime(d).gget();
+    double print = s.get();
+    
+    std :: cout << print << std :: endl;
+    return 0;
+}
+
+
+
