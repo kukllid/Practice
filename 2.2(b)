@@ -1,0 +1,19 @@
+#include <iostream>
+
+void f(int a, int b) {
+    std::cout << "1 ";
+}
+
+void f(const char * a, const char * b) {
+    std::cout << "2 ";
+}
+
+int main() {
+   
+    f(0, 1);          
+    f(1, 0);    
+    f(0, "m");       
+    f("n", 0);   
+
+    return 0;
+}
