@@ -1,0 +1,37 @@
+#include <iostream>
+
+class Cls {
+    int i;
+
+public:
+    Cls() { i = 1; }
+
+    Cls(const Cls& other) : i(other.i) {} // конструктор копирования
+
+    Cls& operator=(const Cls& other) { // оператор присваивания
+        if (this != &other) {
+            i = other.i;
+        }
+        return *this;
+    }
+
+    int getI() const { // Добавлен метод для доступа к i
+        return i;
+    }
+
+private: // конструктор копирования и оператор присваивания становится недоступным
+    Cls(const Cls& other);
+    Cls& operator=(const Cls& other);
+};
+
+void f(Cls * p, Cls * q) {
+    *p = *q; 
+}
+
+int main() {
+    Cls obj1, obj2;
+    Cls *ptr1 = &obj1;
+    Cls *ptr2 = &obj2;
+    f(ptr1, ptr2); 
+    return 0;
+}

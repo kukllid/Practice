@@ -1,0 +1,16 @@
+int f(int a = 0) { return a; }
+int f(double a) { return a; }
+
+int main() {
+    short int s;
+    int i;
+    bool b;
+    enum e {A, B, C};
+    float f1 = 1.0f;
+
+    f(); //1 - точное отождествение f(int a = 0)
+    f(s); //2 - отождествление с помощью расширений short int -> int
+    f(f1); //2 - отождествление с помощью расширений float t -> int
+    f(b); // 2 - отождествление с помощью расширений bool -> int
+    f(A); // 2 - отождествление с помощью расширений enum -> int
+}
