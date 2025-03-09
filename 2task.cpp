@@ -1,7 +1,13 @@
 #include <iostream>
 #include <string>
+class Person {
+    public: 
+        virtual std::string getName() const = 0;
+        virtual ~Person() {} // Virtual destructor
 
-class Student {
+};
+
+class Student: public Person {
 private:
     std::string name;
     int grade;
